@@ -58,7 +58,7 @@ pytest==7.4.0
 pytest-cov==4.1.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.0
-pytz==2025.1
+pytz==2023.3  # Updated to a version compatible with mlflow==2.6.0
 PyYAML==6.0.2
 querystring-parser==1.2.4
 requests==2.32.3
