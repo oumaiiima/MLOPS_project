@@ -1,29 +1,50 @@
 pipeline {
     agent any
-    
+
     environment {
-        GITHUB_CREDENTIALS = credentials('github-token') // Remplacer par l'ID du credential
+        GITHUB_CREDENTIALS = credentials('github-token') // Remplacer 'github-token' par l'ID de ton credential
     }
-    
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                script {
-                    // Utiliser le token pour cloner le repo GitHub
-                    sh """
-                    git clone https://github.com/ton-utilisateur/ton-repository.git
-                    """
-                }
+                git branch: 'master',
+                    url: "https://${GITHUB_CREDENTIALS}@github.com/oumaiiima/MLOPS_project.git"
             }
         }
-        
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
-                // Étapes pour compiler ton projet ou exécuter des tests
-                echo 'Build process'
+                sh 'python3 -m pip install --upgrade pip'
+                sh 'python3 -m pip install --ignore-installed -r requirements.txt'
             }
         }
-        
-        // Ajouter d'autres stages comme test, déploiement, etc.
+        stage('Prepare Data') {
+            steps {
+                sh 'python3 src/main.py --train data/churn-bigml-80.csv --test data/churn-bigml-20.csv --prepare'
+            }
+        }
+        stage('Train Model') {
+            steps {
+                sh 'python3 src/main.py --train data/churn-bigml-80.csv --test data/churn-bigml-20.csv --train'
+            }
+        }
+        stage('Evaluate Model') {
+            steps {
+                sh 'python3 src/main.py --test data/churn-bigml-20.csv --evaluate'
+            }
+        }
+        stage('Deploy Model') {
+            steps {
+                sh 'python3 src/main.py --deploy'
+            }
+        }
+    }
+    post {
+        failure {
+            echo 'Pipeline failed!'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
     }
 }
