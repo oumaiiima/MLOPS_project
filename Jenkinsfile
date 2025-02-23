@@ -16,7 +16,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '. venv/bin/activate'
-                sh 'export PYTHONPATH="${PYTHONPATH}:/root/.jenkins/workspace/job2/src"'
+                sh 'export PYTHONPATH="/root/.jenkins/workspace/job2/src"'  // Utilisez un chemin absolu
                 sh 'echo "PYTHONPATH: ${PYTHONPATH}"'  // Affiche le PYTHONPATH pour vérification
                 sh 'pytest test/test_data_preparation.py -v'
                 sh 'pytest test/test_integration.py -v'
