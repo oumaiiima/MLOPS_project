@@ -4,6 +4,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/oumaiiima/MLOPS_project.git'
+                // Ajouter une commande pour lister les fichiers dans le répertoire du projet
+                sh 'ls -l'
             }
         }
         stage('Install Dependencies') {
@@ -29,7 +31,6 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                // Ajout du PYTHONPATH pour que les tests trouvent le répertoire src
                 sh 'PYTHONPATH=src pytest test/test_data_preparation.py --maxfail=1 --disable-warnings -q'
                 sh 'PYTHONPATH=src pytest test/test_integration.py --maxfail=1 --disable-warnings -q'
                 sh 'PYTHONPATH=src pytest test/test_model_evaluation.py --maxfail=1 --disable-warnings -q'
