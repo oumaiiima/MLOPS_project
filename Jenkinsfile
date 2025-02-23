@@ -15,14 +15,16 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                sh '. venv/bin/activate && export PYTHONPATH="${PYTHONPATH}:${WORKSPACE}/src"'
-                sh '. venv/bin/activate && pytest test/test_data_preparation.py -v'
-                sh '. venv/bin/activate && pytest test/test_integration.py -v'
-                sh '. venv/bin/activate && pytest test/test_model_evaluation.py -v'
-                sh '. venv/bin/activate && pytest test/test_model_training.py -v'
-                sh '. venv/bin/activate && pytest test/test_performance.py -v'
-                sh '. venv/bin/activate && pytest test/test_predict.py -v'
-                sh '. venv/bin/activate && pytest test/test_train_time.py -v'
+                sh '. venv/bin/activate'
+                sh 'export PYTHONPATH="${PYTHONPATH}:/root/.jenkins/workspace/job2/src"'
+                sh 'echo "PYTHONPATH: ${PYTHONPATH}"'  // Affiche le PYTHONPATH pour vérification
+                sh 'pytest test/test_data_preparation.py -v'
+                sh 'pytest test/test_integration.py -v'
+                sh 'pytest test/test_model_evaluation.py -v'
+                sh 'pytest test/test_model_training.py -v'
+                sh 'pytest test/test_performance.py -v'
+                sh 'pytest test/test_predict.py -v'
+                sh 'pytest test/test_train_time.py -v'
             }
         }
         stage('Prepare Data') {
