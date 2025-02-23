@@ -6,6 +6,11 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/oumaiiima/MLOPS_project.git'
             }
         }
+        stage('Check Files') {
+            steps {
+                sh 'ls -R'  // Liste tous les fichiers et dossiers
+            }
+        }
         stage('Install Dependencies') {
             steps {
                 sh 'python3 -m pip install --upgrade pip'
@@ -14,14 +19,14 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                // Exécuter les tests unitaires et d'intégration
-                sh 'pytest tests/test_data_preparation.py -v'
-                sh 'pytest tests/test_integration.py -v'
-                sh 'pytest tests/test_model_evaluation.py -v'
-                sh 'pytest tests/test_model_training.py -v'
-                sh 'pytest tests/test_performance.py -v'
-                sh 'pytest tests/test_predict.py -v'
-                sh 'pytest tests/test_train_time.py -v'
+                // Exécuter les tests depuis le dossier "test"
+                sh 'pytest test/test_data_preparation.py -v'
+                sh 'pytest test/test_integration.py -v'
+                sh 'pytest test/test_model_evaluation.py -v'
+                sh 'pytest test/test_model_training.py -v'
+                sh 'pytest test/test_performance.py -v'
+                sh 'pytest test/test_predict.py -v'
+                sh 'pytest test/test_train_time.py -v'
             }
         }
         stage('Prepare Data') {
