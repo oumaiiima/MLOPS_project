@@ -27,6 +27,17 @@ pipeline {
                 sh 'python3 src/main.py --train-data data/train.csv --test data/test.csv --evaluate'
             }
         }
+        stage('Run Tests') {
+            steps {
+                sh 'pytest test/test_data_preparation.py --maxfail=1 --disable-warnings -q'
+                sh 'pytest test/test_integration.py --maxfail=1 --disable-warnings -q'
+                sh 'pytest test/test_model_evaluation.py --maxfail=1 --disable-warnings -q'
+                sh 'pytest test/test_model_training.py --maxfail=1 --disable-warnings -q'
+                sh 'pytest test/test_performance.py --maxfail=1 --disable-warnings -q'
+                sh 'pytest test/test_predict.py --maxfail=1 --disable-warnings -q'
+                sh 'pytest test/test_train_time.py --maxfail=1 --disable-warnings -q'
+            }
+        }
     }
     post {
         failure {
