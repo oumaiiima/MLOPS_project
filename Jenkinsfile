@@ -15,11 +15,15 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                sh '. venv/bin/activate'
-                sh 'echo "Current directory: $(pwd)"'  // Affiche le répertoire actuel
-                sh 'export PYTHONPATH="$(pwd)/src"'   // Utilise le répertoire actuel pour définir PYTHONPATH
-                sh 'echo "PYTHONPATH: ${PYTHONPATH}"' // Affiche PYTHONPATH pour vérification
-                sh 'pytest test/test_data_preparation.py -v'
+                script {
+                    // Définir PYTHONPATH et exécuter pytest dans la même commande shell
+                    sh '''
+                    . venv/bin/activate
+                    export PYTHONPATH=$(pwd)/src
+                    echo "PYTHONPATH: ${PYTHONPATH}"
+                    pytest test/test_data_preparation.py -v
+                    '''
+                }
             }
         }
         stage('Prepare Data') {
@@ -40,10 +44,10 @@ pipeline {
     }
     post {
         failure {
-            echo 'Pipeline failed!'
+            echo 'Le pipeline a échoué !'
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo 'Le pipeline a réussi !'
         }
     }
 }
