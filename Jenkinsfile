@@ -43,7 +43,7 @@ pipeline {
                         echo "Missing dataset files!"
                         exit 1
                     fi
-                    python3 src/main.py --train-data data/train.csv --test-data data/test.csv --prepare
+                    python3 src/main.py --train-data data/train.csv --test data/test.csv --prepare
                 '''
             }
         }
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 sh '''
                     . ${VENV_PATH}/bin/activate
-                    python3 src/main.py --train-data data/train.csv --test-data data/test.csv --train
+                    python3 src/main.py --train-data data/train.csv --test data/test.csv --train
                 '''
             }
         }
@@ -59,7 +59,7 @@ pipeline {
             steps {
                 sh '''
                     . ${VENV_PATH}/bin/activate
-                    python3 src/main.py --train-data data/train.csv --test-data data/test.csv --evaluate
+                    python3 src/main.py --train-data data/train.csv --test data/test.csv --evaluate
                 '''
             }
         }
