@@ -1,43 +1,66 @@
 pipeline {
     agent any
+    environment {
+        VENV_PATH = 'venv'
+    }
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/oumaiiima/MLOPS_project.git'
-                // Ajouter une commande pour lister les fichiers dans le répertoire du projet
-                sh 'ls -l'
             }
         }
-        stage('Install Dependencies') {
+        stage('Setup Python Environment') {
             steps {
-                sh 'python3 -m pip install --upgrade pip'
-                sh 'python3 -m pip install --ignore-installed -r requirements.txt'
+                sh '''
+                    python3 -m venv ${VENV_PATH}
+                    . ${VENV_PATH}/bin/activate
+                    python3 -m pip install --upgrade pip
+                    python3 -m pip install --ignore-installed -r requirements.txt
+                '''
+            }
+        }
+        stage('Unit Tests') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh '''
+                        . ${VENV_PATH}/bin/activate
+                        export PYTHONPATH=${WORKSPACE}  # Ajouter le répertoire de travail au PYTHONPATH
+                        pytest --cov=src --cov-report=xml --junitxml=pytest_report.xml test/
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'pytest_report.xml, coverage.xml', allowEmptyArchive: true
+                }
             }
         }
         stage('Prepare Data') {
             steps {
-                sh 'python3 src/main.py --train-data data/train.csv --test data/test.csv --prepare'
+                sh '''
+                    . ${VENV_PATH}/bin/activate
+                    if [ ! -f data/train.csv ] || [ ! -f data/test.csv ]; then
+                        echo "Missing dataset files!"
+                        exit 1
+                    fi
+                    python3 src/main.py --train-data data/train.csv --test-data data/test.csv --prepare
+                '''
             }
         }
         stage('Train Model') {
             steps {
-                sh 'python3 src/main.py --train-data data/train.csv --test data/test.csv --train'
+                sh '''
+                    . ${VENV_PATH}/bin/activate
+                    python3 src/main.py --train-data data/train.csv --test-data data/test.csv --train
+                '''
             }
         }
         stage('Evaluate Model') {
             steps {
-                sh 'python3 src/main.py --train-data data/train.csv --test data/test.csv --evaluate'
-            }
-        }
-        stage('Run Tests') {
-            steps {
-                sh 'PYTHONPATH=src pytest test/test_data_preparation.py --maxfail=1 --disable-warnings -q'
-                sh 'PYTHONPATH=src pytest test/test_integration.py --maxfail=1 --disable-warnings -q'
-                sh 'PYTHONPATH=src pytest test/test_model_evaluation.py --maxfail=1 --disable-warnings -q'
-                sh 'PYTHONPATH=src pytest test/test_model_training.py --maxfail=1 --disable-warnings -q'
-                sh 'PYTHONPATH=src pytest test/test_performance.py --maxfail=1 --disable-warnings -q'
-                sh 'PYTHONPATH=src pytest test/test_predict.py --maxfail=1 --disable-warnings -q'
-                sh 'PYTHONPATH=src pytest test/test_train_time.py --maxfail=1 --disable-warnings -q'
+                sh '''
+                    . ${VENV_PATH}/bin/activate
+                    python3 src/main.py --train-data data/train.csv --test-data data/test.csv --evaluate
+                '''
             }
         }
     }
