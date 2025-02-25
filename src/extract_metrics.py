@@ -13,7 +13,7 @@ def extract_latest_metrics():
         # Récupérer la dernière run
         runs = mlflow.search_runs(order_by=["start_time DESC"], max_results=1)
         if runs.empty:
-            print("Aucune run trouvée dans MLflow.")
+            print("🌟✨ Aucune run trouvée dans MLflow. ✨🌟")
             # Créer un fichier JSON vide
             with open("mlflow_metrics.json", "w") as f:
                 json.dump({}, f)
@@ -34,7 +34,22 @@ def extract_latest_metrics():
         with open("mlflow_metrics.json", "w") as f:
             json.dump(metrics, f, indent=4)
 
-        print("Métriques extraites avec succès :", metrics)
+        # Encadrer et mettre en forme les métriques
+        print("\n" + "=" * 60)
+        print("🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨")
+        print("📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉")
+        print("🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨")
+        print("\n✅ Métriques extraites avec succès ! 🎉")
+        print(f"📄 Run ID: {metrics['run_id']}")
+        print(f"📊 Accuracy: {metrics['accuracy']}")
+        print(f"📈 Precision: {metrics['precision']}")
+        print(f"📉 Recall: {metrics['recall']}")
+        print(f"📊 F1 Score: {metrics['f1_score']}")
+        print("\n🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨")
+        print("📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉📊📈📉")
+        print("🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨🌟✨")
+        print("=" * 60 + "\n")
+
     except Exception as e:
         print(f"❌ Erreur lors de l'extraction des métriques : {e}")
         # Créer un fichier JSON vide en cas d'erreur
