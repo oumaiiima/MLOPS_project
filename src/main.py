@@ -28,7 +28,7 @@ def assign_stage_to_model_version(model_name, version, stage):
     except Exception as e:
         print(f"❌ Failed to assign stage: {e}")
 
-def main(train_path=None, test_path=None, prepare_only_flag=False, predict_flag=False, mlflow_flag=False, register_flag=False, stage=None, model_version=None, assign_stage=None):
+def main(train_path=None, test_path=None, prepare_only_flag=False, predict_flag=False, mlflow_flag=False, register_flag=False, evaluate_flag=False, stage=None, model_version=None, assign_stage=None):
     """
     Main function to handle data preparation, training, evaluation, and prediction.
     """
@@ -76,6 +76,22 @@ def main(train_path=None, test_path=None, prepare_only_flag=False, predict_flag=
         if train_path is None or test_path is None:
             raise ValueError("❌ Les arguments --train et --test sont requis pour la préparation des données.")
         prepare_only(train_path, test_path)
+    elif evaluate_flag:
+        if train_path is None or test_path is None:
+            raise ValueError("❌ Les arguments --train et --test sont requis pour l'évaluation du modèle.")
+        
+        # Préparation des données
+        X_train, X_test, y_train, y_test = prepare_data(train_path, test_path)
+        print("\n✅ Data Preparation Completed!")
+
+        # Charger le modèle
+        model = load_model("gbm_model.joblib")
+        print("\n📥 Model loaded successfully!")
+
+        # Évaluation du modèle
+        print("\n📊 Evaluating the model...")
+        evaluate_model(model, X_test, y_test)
+        print("✅ Model evaluation successful!")
     else:
         if train_path is None or test_path is None:
             raise ValueError("❌ Les arguments --train et --test sont requis pour l'entraînement du modèle.")
@@ -96,11 +112,6 @@ def main(train_path=None, test_path=None, prepare_only_flag=False, predict_flag=
             mlflow.sklearn.log_model(model, "Churn_Prediction_Model")
             print("\n✅ Modèle enregistré dans MLflow Model Registry !")
 
-        # Évaluation du modèle
-        print("\n📊 Evaluating the model...")
-        evaluate_model(model, X_test, y_test)
-        print("✅ Model evaluation successful!")
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train, evaluate, or predict using the model pipeline.")
     parser.add_argument("--train", type=str, required=False, help="Path to the training CSV file")
@@ -109,8 +120,7 @@ if __name__ == "__main__":
     parser.add_argument("--predict", action="store_true", help="Run a prediction using a trained model")
     parser.add_argument("--mlflow", action="store_true", help="Enable MLflow tracking for model training")
     parser.add_argument("--register", action="store_true", help="Register the trained model in MLflow Model Registry")
-
-    # Ajout des nouveaux arguments pour le stage et la version du modèle
+    parser.add_argument("--evaluate", action="store_true", help="Evaluate the trained model")
     parser.add_argument("--stage", type=str, help="Stage of the model (e.g., 'Production', 'Staging')")
     parser.add_argument("--model_version", type=int, default=None, help="Version of the model in MLflow Model Registry")
     parser.add_argument("--assign_stage", type=str, help="Assign a stage (e.g., 'Production', 'Staging') to a model version")
@@ -124,6 +134,7 @@ if __name__ == "__main__":
         predict_flag=args.predict,
         mlflow_flag=args.mlflow,
         register_flag=args.register,
+        evaluate_flag=args.evaluate,
         stage=args.stage,
         model_version=args.model_version,
         assign_stage=args.assign_stage
