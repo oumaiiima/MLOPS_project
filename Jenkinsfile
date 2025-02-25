@@ -2,8 +2,18 @@ pipeline {
     agent any
     environment {
         VENV_PATH = 'venv'
+        MLFLOW_TRACKING_URI = 'http://localhost:5001'  // URI de suivi MLflow
     }
     stages {
+        stage('Clean Workspace') {
+            steps {
+                sh '''
+                    # Nettoyer les artefacts précédents
+                    rm -rf ${VENV_PATH}
+                    rm -f security_report.json pytest_report.xml coverage.xml mlflow_metrics.json
+                '''
+            }
+        }
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/oumaiiima/MLOPS_project.git'
@@ -16,7 +26,7 @@ pipeline {
                     . ${VENV_PATH}/bin/activate
                     python3 -m pip install --upgrade pip
                     python3 -m pip install --ignore-installed -r requirements.txt
-                    python3 -m pip install flake8 bandit
+                    python3 -m pip install flake8 bandit pytest pytest-cov
                 '''
             }
         }
@@ -28,7 +38,7 @@ pipeline {
                         echo "Missing dataset files!"
                         exit 1
                     fi
-                    python3 src/main.py --train-data data/train.csv --test data/test.csv --prepare
+                    python3 src/main.py --train data/train.csv --test data/test.csv --prepare
                 '''
             }
         }
@@ -36,7 +46,7 @@ pipeline {
             steps {
                 sh '''
                     . ${VENV_PATH}/bin/activate
-                    python3 src/main.py --train-data data/train.csv --test data/test.csv --train
+                    python3 src/main.py --train data/train.csv --test data/test.csv --mlflow --register
                 '''
             }
         }
@@ -44,7 +54,7 @@ pipeline {
             steps {
                 sh '''
                     . ${VENV_PATH}/bin/activate
-                    python3 src/main.py --train-data data/train.csv --test data/test.csv --evaluate
+                    python3 src/main.py --train data/train.csv --test data/test.csv --evaluate
                 '''
             }
         }
@@ -78,7 +88,7 @@ pipeline {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     sh '''
                         . ${VENV_PATH}/bin/activate
-                        export PYTHONPATH=${WORKSPACE}
+                        export PYTHONPATH=${WORKSPACE}/src
                         pytest --cov=src --cov-report=xml --junitxml=pytest_report.xml test/
                     '''
                 }
@@ -86,6 +96,19 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'pytest_report.xml, coverage.xml', allowEmptyArchive: true
+                }
+            }
+        }
+        stage('Extract MLflow Metrics') {
+            steps {
+                sh '''
+                    . ${VENV_PATH}/bin/activate
+                    python3 src/extract_metrics.py
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'mlflow_metrics.json', allowEmptyArchive: true
                 }
             }
         }
