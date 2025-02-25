@@ -44,4 +44,3 @@ def extract_latest_metrics():
 
 if __name__ == "__main__":
     extract_latest_metrics()
-    extract_latest_metrics()
