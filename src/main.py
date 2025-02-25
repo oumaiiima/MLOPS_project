@@ -123,19 +123,32 @@ def main(
 
         # Charger le modèle
         model = load_model("gbm_model.joblib")
+        if model is None:
+            print("❌ Le modèle n'a pas pu être chargé.")
+            return
+
         print("\n📥 Model loaded successfully!")
 
         # Évaluation du modèle
         print("\n📊 Evaluating the model...")
-        accuracy, report = evaluate_model(model, X_test, y_test)
-        print("✅ Model evaluation successful!")
+        try:
+            accuracy, report = evaluate_model(model, X_test, y_test)
+            if accuracy is None or report is None:
+                print("❌ L'évaluation du modèle a échoué.")
+                return
 
-        # Enregistrer les métriques dans MLflow si activé
-        if mlflow_flag:
-            with mlflow.start_run():
-                mlflow.log_metric("accuracy", accuracy)
-                mlflow.log_text(report, "classification_report.txt")
-                print("✅ Metrics logged to MLflow.")
+            print("✅ Model evaluation successful!")
+            print(f"📊 Accuracy: {accuracy}")
+            print(f"📊 Classification Report:\n{report}")
+
+            # Enregistrer les métriques dans MLflow si activé
+            if mlflow_flag:
+                with mlflow.start_run():
+                    mlflow.log_metric("accuracy", accuracy)
+                    mlflow.log_text(report, "classification_report.txt")
+                    print("✅ Metrics logged to MLflow.")
+        except Exception as e:
+            print(f"❌ Erreur lors de l'évaluation du modèle : {e}")
     else:
         if train_path is None or test_path is None:
             raise ValueError(
@@ -151,6 +164,9 @@ def main(
             with mlflow.start_run():
                 # Entraîner le modèle
                 model = train_model(X_train, y_train)
+                if model is None:
+                    print("❌ Le modèle n'a pas pu être entraîné.")
+                    return
 
                 # Sauvegarde du modèle localement
                 save_model(model)
@@ -164,13 +180,24 @@ def main(
                     print("\n✅ Modèle enregistré dans MLflow Model Registry !")
 
                 # Évaluer le modèle et enregistrer les métriques
-                accuracy, report = evaluate_model(model, X_test, y_test)
-                mlflow.log_metric("accuracy", accuracy)
-                mlflow.log_text(report, "classification_report.txt")
-                print("✅ Metrics logged to MLflow.")
+                try:
+                    accuracy, report = evaluate_model(model, X_test, y_test)
+                    if accuracy is None or report is None:
+                        print("❌ L'évaluation du modèle a échoué.")
+                        return
+
+                    mlflow.log_metric("accuracy", accuracy)
+                    mlflow.log_text(report, "classification_report.txt")
+                    print("✅ Metrics logged to MLflow.")
+                except Exception as e:
+                    print(f"❌ Erreur lors de l'évaluation du modèle : {e}")
         else:
             # Entraîner le modèle sans MLflow
             model = train_model(X_train, y_train)
+            if model is None:
+                print("❌ Le modèle n'a pas pu être entraîné.")
+                return
+
             save_model(model)
             print("\n✅ Model saved successfully!")
 
