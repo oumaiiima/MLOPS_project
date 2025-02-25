@@ -63,7 +63,7 @@ pipeline {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     sh '''
                         . ${VENV_PATH}/bin/activate
-                        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+                        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv
                     '''
                 }
             }
@@ -88,8 +88,8 @@ pipeline {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     sh '''
                         . ${VENV_PATH}/bin/activate
-                        export PYTHONPATH=${WORKSPACE}/src
-                        pytest --cov=src --cov-report=xml --junitxml=pytest_report.xml test/
+                        export PYTHONPATH=${WORKSPACE}/oumay-ml_project/src  # Ajoutez le répertoire src au PYTHONPATH
+                        pytest --cov=src --cov-report=xml --junitxml=pytest_report.xml test
                     '''
                 }
             }
@@ -103,7 +103,8 @@ pipeline {
             steps {
                 sh '''
                     . ${VENV_PATH}/bin/activate
-                    python3 src/extract_metrics.py
+                    python3 src/extract_metrics.py || echo "Aucune run trouvée, génération d'un fichier vide."
+                    touch mlflow_metrics.json  # Crée un fichier vide si aucun n'existe
                 '''
             }
             post {
