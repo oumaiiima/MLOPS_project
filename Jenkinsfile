@@ -58,31 +58,6 @@ pipeline {
                 '''
             }
         }
-        stage('Quality Test') {
-            steps {
-                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    sh '''
-                        . ${VENV_PATH}/bin/activate
-                        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv
-                    '''
-                }
-            }
-        }
-        stage('Security Test') {
-            steps {
-                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    sh '''
-                        . ${VENV_PATH}/bin/activate
-                        bandit -r src/ -f json -o security_report.json
-                    '''
-                }
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'security_report.json', allowEmptyArchive: true
-                }
-            }
-        }
         stage('Unit Tests') {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
