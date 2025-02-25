@@ -88,7 +88,7 @@ pipeline {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     sh '''
                         . ${VENV_PATH}/bin/activate
-                        export PYTHONPATH=${WORKSPACE}/oumay-ml_project/src  # Ajoutez le répertoire src au PYTHONPATH
+                        export PYTHONPATH=${WORKSPACE}/oumay-ml_project  # Ajoutez le répertoire racine du projet
                         pytest --cov=src --cov-report=xml --junitxml=pytest_report.xml test
                     '''
                 }
