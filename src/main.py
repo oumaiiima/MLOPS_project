@@ -127,8 +127,15 @@ def main(
 
         # Évaluation du modèle
         print("\n📊 Evaluating the model...")
-        evaluate_model(model, X_test, y_test)
+        accuracy, report = evaluate_model(model, X_test, y_test)
         print("✅ Model evaluation successful!")
+
+        # Enregistrer les métriques dans MLflow si activé
+        if mlflow_flag:
+            with mlflow.start_run():
+                mlflow.log_metric("accuracy", accuracy)
+                mlflow.log_text(report, "classification_report.txt")
+                print("✅ Metrics logged to MLflow.")
     else:
         if train_path is None or test_path is None:
             raise ValueError(
@@ -140,16 +147,32 @@ def main(
         print("\n✅ Data Preparation Completed!")
 
         print("\n🚀 Training Model...")
-        model = train_model(X_train, y_train, mlflow_flag=mlflow_flag)
+        if mlflow_flag:
+            with mlflow.start_run():
+                # Entraîner le modèle
+                model = train_model(X_train, y_train)
 
-        # Sauvegarde du modèle localement
-        save_model(model)
-        print("\n✅ Model saved successfully!")
+                # Sauvegarde du modèle localement
+                save_model(model)
+                print("\n✅ Model saved successfully!")
 
-        # Enregistrement dans le registre MLflow si nécessaire
-        if mlflow_flag and register_flag:
-            mlflow.sklearn.log_model(model, "Churn_Prediction_Model")
-            print("\n✅ Modèle enregistré dans MLflow Model Registry !")
+                # Enregistrement dans le registre MLflow si nécessaire
+                if register_flag:
+                    mlflow.sklearn.log_model(
+                        model, "Churn_Prediction_Model", registered_model_name="Churn_Prediction_Model"
+                    )
+                    print("\n✅ Modèle enregistré dans MLflow Model Registry !")
+
+                # Évaluer le modèle et enregistrer les métriques
+                accuracy, report = evaluate_model(model, X_test, y_test)
+                mlflow.log_metric("accuracy", accuracy)
+                mlflow.log_text(report, "classification_report.txt")
+                print("✅ Metrics logged to MLflow.")
+        else:
+            # Entraîner le modèle sans MLflow
+            model = train_model(X_train, y_train)
+            save_model(model)
+            print("\n✅ Model saved successfully!")
 
 
 if __name__ == "__main__":

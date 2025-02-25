@@ -54,7 +54,7 @@ pipeline {
             steps {
                 sh '''
                     . ${VENV_PATH}/bin/activate
-                    python3 src/main.py --train data/train.csv --test data/test.csv --evaluate
+                    python3 src/main.py --train data/train.csv --test data/test.csv --evaluate --mlflow
                 '''
             }
         }
