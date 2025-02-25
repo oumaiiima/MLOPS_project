@@ -1,15 +1,13 @@
 import mlflow
 import json
-import os
 
 # Configurer le Tracking URI
-mlflow.set_tracking_uri("http://localhost:5001")
+mlflow.set_tracking_uri("http://localhost:5000")
 
 
 def extract_latest_metrics():
     """
     Extrait les métriques de la dernière run MLflow et les sauvegarde dans un fichier JSON.
-    Si aucune run n'est trouvée, un fichier JSON vide est créé.
     """
     try:
         # Récupérer la dernière run
@@ -29,7 +27,7 @@ def extract_latest_metrics():
             "accuracy": latest_run.get("metrics.accuracy", "N/A"),
             "precision": latest_run.get("metrics.precision", "N/A"),
             "recall": latest_run.get("metrics.recall", "N/A"),
-            "f1_score": latest_run.get("metrics.f1_score", "N/A"),  # Exemple de métrique supplémentaire
+            "f1_score": latest_run.get("metrics.f1_score", "N/A"),
         }
 
         # Sauvegarder les métriques dans un fichier JSON
@@ -45,4 +43,5 @@ def extract_latest_metrics():
 
 
 if __name__ == "__main__":
+    extract_latest_metrics()
     extract_latest_metrics()

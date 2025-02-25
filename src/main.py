@@ -145,6 +145,15 @@ def main(
             if mlflow_flag:
                 with mlflow.start_run():
                     mlflow.log_metric("accuracy", accuracy)
+                    # Extraire precision, recall, et f1_score du rapport de classification
+                    report_lines = report.split("\n")
+                    precision = float(report_lines[2].split()[2])
+                    recall = float(report_lines[2].split()[3])
+                    f1_score = float(report_lines[2].split()[4])
+
+                    mlflow.log_metric("precision", precision)
+                    mlflow.log_metric("recall", recall)
+                    mlflow.log_metric("f1_score", f1_score)
                     mlflow.log_text(report, "classification_report.txt")
                     print("✅ Metrics logged to MLflow.")
         except Exception as e:
@@ -187,6 +196,15 @@ def main(
                         return
 
                     mlflow.log_metric("accuracy", accuracy)
+                    # Extraire precision, recall, et f1_score du rapport de classification
+                    report_lines = report.split("\n")
+                    precision = float(report_lines[2].split()[2])
+                    recall = float(report_lines[2].split()[3])
+                    f1_score = float(report_lines[2].split()[4])
+
+                    mlflow.log_metric("precision", precision)
+                    mlflow.log_metric("recall", recall)
+                    mlflow.log_metric("f1_score", f1_score)
                     mlflow.log_text(report, "classification_report.txt")
                     print("✅ Metrics logged to MLflow.")
                 except Exception as e:
