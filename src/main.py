@@ -57,6 +57,12 @@ def main(
     mlflow.set_tracking_uri("http://localhost:5000")
     print(f"Tracking URI: {mlflow.get_tracking_uri()}")
 
+    # Définir l'expérience
+    experiment_name = "Churn_Prediction"
+    if not mlflow.get_experiment_by_name(experiment_name):
+        mlflow.create_experiment(experiment_name)
+    mlflow.set_experiment(experiment_name)
+
     # Assigner un stage à une version si demandé
     if assign_stage:
         if not model_version:
